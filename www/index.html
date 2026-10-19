@@ -133,7 +133,7 @@
     border:1px solid var(--line); border-radius:9px; padding:10px; font-size:13.5px; width:100%;
     background:#fff;
   }
-  .nota-row .num{flex:1.3;}
+  .nota-row .num{flex:1;}
   .nota-row .vol{flex:1;}
   .nota-row .chave{
     margin-top:7px; font-size:12px; font-family:ui-monospace,'SFMono-Regular',Menlo,monospace; letter-spacing:0.2px;
@@ -315,9 +315,9 @@
     <div class="sub" id="modalEndereco">Endereço</div>
     <div class="sub" id="modalTempo" style="color:var(--warn); font-weight:700; margin-top:4px;"></div>
 
-    <div class="field-label">Notas fiscais e volumes</div>
+    <div class="field-label">Quantidade de notas e volumes</div>
     <div id="notasContainer"></div>
-    <button class="add-nota" onclick="adicionarNota()">+ Adicionar outra nota fiscal</button>
+    <button class="add-nota" onclick="adicionarNota()">+ Adicionar outra linha</button>
 
     <div class="field-label">Foto do recebimento da carga</div>
     <div class="photo-box" id="photoBox">
@@ -610,6 +610,12 @@
   let sincronizando = false;
   let geracaoSync = 0;          // muda a cada evento confirmado pelo servidor
 
+  // Quantidade de notas e volumes de cada coleta concluída, guardada no
+  // celular. A lista do servidor (/coletas-motorista) só traz a contagem de
+  // notas; os volumes vêm do registro feito aqui ou da Auditoria.
+  let REGISTROS = {};
+  async function salvarRegistros() { await Store.set('registros', REGISTROS); }
+
   async function salvarFila() { await Store.set('fila', FILA); }
   async function salvarBase() { await Store.set('base', BASE); }
 
@@ -631,13 +637,20 @@
       c.status = 'concluida';
       c.iniciada_em = c.iniciada_em || ev.capturado_em;
       c.concluida_em = ev.resultado?.concluida_em || ev.capturado_em;
-      c.notas_count = (ev.payload.notas || []).length;
+      c.notas_count = ev.payload.quantidade_notas ?? (ev.payload.notas || []).length;
+      if (ev.payload.quantidade_volumes != null) c.quantidade_volumes = ev.payload.quantidade_volumes;
     }
     if (marcarPendente) c._pendente = true;
   }
 
   function recomputar() {
     coletas = BASE.coletas.map(c => ({ ...c }));
+    coletas.forEach(c => {
+      const reg = REGISTROS[c.id];
+      if (!reg || c.status !== 'concluida') return;
+      if (c.quantidade_notas == null && reg.notas != null) c.quantidade_notas = reg.notas;
+      if (c.quantidade_volumes == null && reg.volumes != null) c.quantidade_volumes = reg.volumes;
+    });
     TURNO = { ...BASE.turno };
     FILA.filter(e => e.estado === 'pendente').forEach(ev => efeitoLocal(ev, coletas, TURNO, true));
     renderTudo();
@@ -785,6 +798,37 @@
   // ------------------------------------------------------------
   //  LISTA DO DIA — GET /webhook/coletas-motorista (WF 10)
   // ------------------------------------------------------------
+  // Coletas concluídas sem notas/volumes guardados no celular (registradas
+  // em outro aparelho, ou antes desta versão): busca na Auditoria, que tem
+  // os dois por id da coleta, e guarda para funcionar também sem sinal.
+  async function completarRegistros(lista) {
+    const faltando = (lista || []).filter(c => c.status === 'concluida'
+      && (!REGISTROS[c.id] || REGISTROS[c.id].volumes == null));
+    if (!faltando.length) return;
+    try {
+      const r = await http('GET', '/listar?entidade=auditoria', null, CONFIG.TIMEOUT_LISTA_MS);
+      const dados = (r.data && r.data.dados) || [];
+      const porId = {};
+      dados.forEach(a => { if (a.id != null) porId[a.id] = a; });
+      let mudou = false;
+      faltando.forEach(c => {
+        const a = porId[c.id];
+        if (!a || a.volumes == null) return;
+        REGISTROS[c.id] = { notas: Number(a.notas), volumes: Number(a.volumes), dia: hojeLocal() };
+        mudou = true;
+      });
+      if (mudou) {
+        // Guarda só os dos últimos dias, para a chave não crescer sem fim.
+        const ids = Object.keys(REGISTROS);
+        if (ids.length > 300) ids.slice(0, ids.length - 300).forEach(k => delete REGISTROS[k]);
+        await salvarRegistros();
+        recomputar();
+      }
+    } catch (e) {
+      console.warn('Falha ao buscar notas e volumes', e); // o card mostra o que tiver
+    }
+  }
+
   async function carregarColetas(silencioso = false) {
     if (!SESSAO.motoristaId) return;
     const geracaoAntes = geracaoSync;
@@ -808,6 +852,7 @@
       };
       await salvarBase();
       recomputar();
+      await completarRegistros(BASE.coletas);
     } catch (e) {
       console.warn('Falha ao carregar coletas', e);
       if (e && /Sem conexão|Failed to fetch|abort|timeout|network/i.test(String(e.message || e.name))) ONLINE = false;
@@ -1169,9 +1214,14 @@
           const mins = (new Date(c.concluida_em) - new Date(c.iniciada_em)) / 60000;
           partes.push(`Tempo no cliente: ${formatarDuracao(mins)}`);
         }
-        if (c.notas_count != null) {
-          const singular = Number(c.notas_count) === 1;
-          partes.push(`${c.notas_count} nota${singular ? '' : 's'} ${singular ? 'fiscal' : 'fiscais'}`);
+        const qtdNotas = c.quantidade_notas != null ? Number(c.quantidade_notas)
+                       : (c.notas_count != null ? Number(c.notas_count) : null);
+        if (qtdNotas != null) {
+          partes.push(qtdNotas + (qtdNotas === 1 ? ' nota fiscal' : ' notas fiscais'));
+        }
+        if (c.quantidade_volumes != null) {
+          const qtdVol = Number(c.quantidade_volumes);
+          partes.push(qtdVol + (qtdVol === 1 ? ' volume' : ' volumes'));
         }
         if (partes.length) extra = `<div class="done-row">${partes.join(' · ')}</div>`;
 
@@ -1396,16 +1446,16 @@
     row.className = 'nota-row';
     row.innerHTML = `
       <div class="nota-linha">
-        <input class="num" type="number" min="1" inputmode="numeric" pattern="[0-9]*" placeholder="Nº da nota fiscal" data-field="numero">
+        <input class="num" type="number" min="1" inputmode="numeric" pattern="[0-9]*" placeholder="Qtd. de notas" data-field="quantidade">
         <input class="vol" type="number" min="1" inputmode="numeric" pattern="[0-9]*" placeholder="Volumes" data-field="volume">
       </div>
       <input class="chave" type="text" inputmode="numeric" maxlength="60"
              placeholder="Chave de acesso da NF-e (opcional)" data-field="chave">
-      <div class="chave-hint">44 dígitos — deixe em branco se não tiver a chave em mãos</div>`;
-    // Nº da nota e volumes aceitam só dígitos: bloqueia "e", "-", "+",
+      <div class="chave-hint">Só quando a quantidade for 1 nota — 44 dígitos, deixe em branco se não tiver</div>`;
+    // Quantidade e volumes aceitam só dígitos: bloqueia "e", "-", "+",
     // "," e "." que o teclado numérico do Android deixa digitar num
     // campo type=number, e limpa qualquer coisa colada.
-    row.querySelectorAll('[data-field="numero"],[data-field="volume"]').forEach(inp => {
+    row.querySelectorAll('[data-field="quantidade"],[data-field="volume"]').forEach(inp => {
       inp.addEventListener('keydown', ev => { if (['e', 'E', '+', '-', ',', '.'].includes(ev.key)) ev.preventDefault(); });
       inp.addEventListener('input', () => { const so = inp.value.replace(/\D/g, ''); if (so !== inp.value) inp.value = so; });
     });
@@ -1433,14 +1483,43 @@
       chaveEl.value = soDigitos;
     }
 
-    const notas = linhas.map(row => ({
-      numero: row.querySelector('[data-field="numero"]').value.replace(/\D/g, ''),
-      volume: row.querySelector('[data-field="volume"]').value.replace(/\D/g, ''),
-      chave:  row.querySelector('[data-field="chave"]').value.trim() || null
-    })).filter(n => n.numero && Number(n.numero) > 0 && n.volume && Number(n.volume) > 0);
+    // O motorista informa QUANTAS notas e quantos volumes (não o número de
+    // cada nota). Para o servidor continuar gravando uma linha por nota — e
+    // a Auditoria e os painéis contarem notas e somarem volumes como antes —
+    // cada linha é desdobrada em N notas sem número ("S/N"), com os volumes
+    // repartidos entre elas sem mudar o total. Mesmo formato do app web.
+    const lotes = [];
+    for (const row of linhas) {
+      const qtdEl = row.querySelector('[data-field="quantidade"]');
+      const volEl = row.querySelector('[data-field="volume"]');
+      const chave = row.querySelector('[data-field="chave"]').value.trim() || null;
+      const qtdTxt = qtdEl.value.replace(/\D/g, ''), volTxt = volEl.value.replace(/\D/g, '');
+      if (!qtdTxt && !volTxt) continue;
+      const qtd = Number(qtdTxt), vol = Number(volTxt);
+      if (!qtd || qtd < 1) { await avisar('Informe a quantidade de notas (a partir de 1).'); qtdEl.focus(); return; }
+      if (!vol || vol < 1) { await avisar('Informe a quantidade de volumes (a partir de 1).'); volEl.focus(); return; }
+      if (vol < qtd) {
+        await avisar('São ' + qtd + ' notas e só ' + vol + ' volume(s): cada nota tem pelo menos 1 volume. Confira.');
+        volEl.focus(); return;
+      }
+      if (chave && qtd !== 1) {
+        await avisar('A chave de acesso só vale quando a linha é de 1 nota. Apague a chave ou separe a nota em outra linha.');
+        row.querySelector('[data-field="chave"]').focus(); return;
+      }
+      lotes.push({ qtd, vol, chave });
+    }
+    const notas = [];
+    lotes.forEach(l => {
+      const base = Math.floor(l.vol / l.qtd), resto = l.vol % l.qtd;
+      for (let i = 0; i < l.qtd; i++) {
+        notas.push({ numero: 'S/N', volume: String(base + (i < resto ? 1 : 0)), chave: l.qtd === 1 ? l.chave : null });
+      }
+    });
+    const totalNotas = lotes.reduce((s, l) => s + l.qtd, 0);
+    const totalVolumes = lotes.reduce((s, l) => s + l.vol, 0);
 
     const foto = document.getElementById('fotoInput').files[0];
-    if (notas.length === 0) { await avisar('Informe ao menos uma nota fiscal com o número de volumes.'); return; }
+    if (notas.length === 0) { await avisar('Informe a quantidade de notas e de volumes.'); return; }
     if (!foto) { await avisar('A foto do recebimento da carga é obrigatória.'); return; }
 
     const c = coletas.find(x => x.id === coletaAtualId);
@@ -1459,11 +1538,15 @@
         coleta_id: c.id,
         foto: uuid + '.jpg',
         rotulo: 'Coleta · ' + c.cliente,
-        payload: { coleta_id: c.id, notas }
+        payload: { coleta_id: c.id, notas, quantidade_notas: totalNotas, quantidade_volumes: totalVolumes }
       });
+      REGISTROS[c.id] = { notas: totalNotas, volumes: totalVolumes, dia: hojeLocal() };
+      await salvarRegistros();
       fecharModal();
       toast((ONLINE === false ? 'Coleta salva no celular. ' : 'Coleta registrada. ')
-        + (minutos != null ? 'Tempo no cliente: ' + formatarDuracao(minutos) : ''), 'ok');
+        + (minutos != null ? 'Tempo no cliente: ' + formatarDuracao(minutos) + ' · ' : '')
+        + (totalNotas === 1 ? '1 nota fiscal' : totalNotas + ' notas fiscais')
+        + ' · ' + (totalVolumes === 1 ? '1 volume' : totalVolumes + ' volumes'), 'ok');
     } catch (e) {
       console.error(e);
       await avisar('Não foi possível salvar a coleta no celular: ' + (e.message || e));
@@ -1562,6 +1645,7 @@
     const sessao = await Store.get('sessao');
     BASE = (await Store.get('base')) || BASE;
     FILA = (await Store.get('fila')) || [];
+    REGISTROS = (await Store.get('registros')) || {};
 
     if (sessao && sessao.motoristaId) {
       SESSAO = sessao;
