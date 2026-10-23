@@ -5,6 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write   # publicar o APK em Releases
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -75,3 +78,20 @@ jobs:
             android/app/build/outputs/apk/release/*.apk
             android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+
+      # Publica o APK numa Release: link fixo para baixar no celular
+      # https://github.com/<dono>/<repo>/releases/latest/download/oeste-cargas-motorista.apk
+      - name: Publicar APK em Releases
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSAO=$(node -p "require('./package.json').version")
+          TAG="v${VERSAO}-${{ github.run_number }}"
+          APK=$(ls android/app/build/outputs/apk/release/*.apk 2>/dev/null | head -1)
+          [ -z "$APK" ] && APK=$(ls android/app/build/outputs/apk/debug/*.apk | head -1)
+          cp "$APK" oeste-cargas-motorista.apk
+          gh release create "$TAG" oeste-cargas-motorista.apk \
+            --title "App do Motorista ${VERSAO} (build ${{ github.run_number }})" \
+            --notes "$(git log -1 --pretty=%B)" \
+            --latest
