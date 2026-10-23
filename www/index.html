@@ -698,6 +698,15 @@
           corpo.foto_base64 = b64;
           corpo.mime_type = 'image/jpeg';
         }
+        if (ev.tipo === 'registrar') {
+          const notasEnvio = (Array.isArray(corpo.notas) ? corpo.notas : []).map(n => ({
+            numero: String(n.numero ?? '').replace(/\D/g, ''),
+            volume: String(n.volume ?? n.quantidade ?? '').replace(/\D/g, ''),
+            chave:  n.chave ? String(n.chave).replace(/\D/g, '') : null
+          }));
+          corpo.notas = notasEnvio;
+          corpo.notas_json = JSON.stringify(notasEnvio);   // reserva, se o array se perder no caminho
+        }
 
         let res;
         try {
@@ -770,6 +779,40 @@
     recomputar();
     await sincronizar();
     carregarColetas(true);
+  }
+
+  // Corrigir: tira o registro recusado da fila e reabre "Finalizar coleta"
+  // com as notas já preenchidas e a mesma foto da carga.
+  async function corrigirRecusado(uuid) {
+    const ev = FILA.find(e => e.uuid === uuid);
+    if (!ev) return;
+    FILA = FILA.filter(e => e.uuid !== uuid);
+    await salvarFila();
+    recomputar();
+    await abrirModal(ev.coleta_id);
+    if (!document.getElementById('overlay').classList.contains('open')) {
+      // coleta não está mais em andamento: devolve o registro para a lista
+      FILA.push(ev); await salvarFila(); recomputar();
+      return;
+    }
+    const notas = ev.payload.notas || [];
+    if (notas.length) {
+      document.getElementById('notasContainer').innerHTML = '';
+      notas.forEach(n => adicionarNota(n));
+    }
+    if (ev.foto) {
+      try {
+        const b64 = await Store.lerFoto(ev.foto);
+        if (b64) {
+          FOTO_REUSO = ev.foto;
+          const img = document.getElementById('photoPreview');
+          img.src = 'data:image/jpeg;base64,' + b64;
+          img.style.display = 'block';
+          document.getElementById('photoPlaceholder').style.display = 'none';
+          document.getElementById('photoBox').classList.add('has-photo');
+        }
+      } catch (e) { /* sem a foto: o motorista tira outra */ }
+    }
   }
 
   async function descartarRecusado(uuid) {
@@ -928,7 +971,11 @@
           <div class="recusa-item">
             <div class="recusa-rotulo">${esc(ev.rotulo)} · ${formatarHorario(ev.capturado_em)}</div>
             <div class="recusa-msg">${esc(ev.mensagem)}</div>
+            ${ev.tipo === 'registrar' ? `<div class="recusa-msg">Digitado: ${
+              (ev.payload.notas || []).map(n => `NF ${esc(n.numero || '(vazio)')} · ${esc(n.volume || '(vazio)')} vol.`).join(' | ') || 'nenhuma nota'
+            }</div>` : ''}
             <div class="recusa-acoes">
+              ${ev.tipo === 'registrar' ? `<button class="btn-ghost-mob" onclick="corrigirRecusado('${ev.uuid}')">Corrigir</button>` : ''}
               <button class="btn-ghost-mob" onclick="reenviarRecusado('${ev.uuid}')">Reenviar</button>
               <button class="btn-ghost-mob perigo" onclick="descartarRecusado('${ev.uuid}')">Descartar</button>
             </div>
@@ -1366,6 +1413,10 @@
   // ============================================================
   let coletaAtualId = null;
 
+  // Foto de um registro recusado que o motorista está corrigindo:
+  // reaproveitada para não precisar fotografar a carga de novo.
+  let FOTO_REUSO = null;
+
   async function abrirModal(id) {
     const c = coletas.find(x => x.id === id);
     if (!c) return;
@@ -1374,6 +1425,7 @@
       return;
     }
     coletaAtualId = id;
+    FOTO_REUSO = null;
     document.getElementById('modalCliente').textContent = c.cliente;
     document.getElementById('modalEndereco').textContent = c.endereco;
     document.getElementById('modalTempo').textContent =
@@ -1391,24 +1443,28 @@
     document.getElementById('overlay').classList.remove('open');
   }
 
-  function adicionarNota() {
+  function adicionarNota(valores) {
     const row = document.createElement('div');
     row.className = 'nota-row';
     row.innerHTML = `
       <div class="nota-linha">
-        <input class="num" type="number" min="1" inputmode="numeric" pattern="[0-9]*" placeholder="Nº da nota fiscal" data-field="numero">
-        <input class="vol" type="number" min="1" inputmode="numeric" pattern="[0-9]*" placeholder="Volumes" data-field="volume">
+        <input class="num" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="12" autocomplete="off" placeholder="Nº da nota fiscal" data-field="numero">
+        <input class="vol" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="5" autocomplete="off" placeholder="Volumes" data-field="volume">
       </div>
       <input class="chave" type="text" inputmode="numeric" maxlength="60"
              placeholder="Chave de acesso da NF-e (opcional)" data-field="chave">
       <div class="chave-hint">44 dígitos — deixe em branco se não tiver a chave em mãos</div>`;
-    // Nº da nota e volumes aceitam só dígitos: bloqueia "e", "-", "+",
-    // "," e "." que o teclado numérico do Android deixa digitar num
-    // campo type=number, e limpa qualquer coisa colada.
+    // Nº da nota e volumes: campo texto com teclado numérico e só
+    // dígitos. Não usa type="number": no WebView do Android ele pode
+    // devolver valor vazio dependendo do teclado (Samsung, Gboard).
     row.querySelectorAll('[data-field="numero"],[data-field="volume"]').forEach(inp => {
-      inp.addEventListener('keydown', ev => { if (['e', 'E', '+', '-', ',', '.'].includes(ev.key)) ev.preventDefault(); });
       inp.addEventListener('input', () => { const so = inp.value.replace(/\D/g, ''); if (so !== inp.value) inp.value = so; });
     });
+    if (valores) {
+      row.querySelector('[data-field="numero"]').value = String(valores.numero ?? '').replace(/\D/g, '');
+      row.querySelector('[data-field="volume"]').value = String(valores.volume ?? valores.quantidade ?? '').replace(/\D/g, '');
+      row.querySelector('[data-field="chave"]').value = valores.chave || '';
+    }
     document.getElementById('notasContainer').appendChild(row);
   }
 
@@ -1441,7 +1497,7 @@
 
     const foto = document.getElementById('fotoInput').files[0];
     if (notas.length === 0) { await avisar('Informe ao menos uma nota fiscal com o número de volumes.'); return; }
-    if (!foto) { await avisar('A foto do recebimento da carga é obrigatória.'); return; }
+    if (!foto && !FOTO_REUSO) { await avisar('A foto do recebimento da carga é obrigatória.'); return; }
 
     const c = coletas.find(x => x.id === coletaAtualId);
     if (!c) return;
@@ -1450,14 +1506,20 @@
     btn.disabled = true; btn.textContent = 'Salvando...';
     try {
       const uuid = novoUuid();
-      const b64 = await comprimirFoto(foto);
-      await Store.salvarFoto(uuid + '.jpg', b64);
+      let nomeFoto = uuid + '.jpg';
+      if (foto) {
+        await Store.salvarFoto(nomeFoto, await comprimirFoto(foto));
+        if (FOTO_REUSO) await Store.apagarFoto(FOTO_REUSO);
+      } else {
+        nomeFoto = FOTO_REUSO;
+      }
+      FOTO_REUSO = null;
       const minutos = c.iniciada_em ? minutosDesde(c.iniciada_em) : null;
       await enfileirar({
         uuid,
         tipo: 'registrar',
         coleta_id: c.id,
-        foto: uuid + '.jpg',
+        foto: nomeFoto,
         rotulo: 'Coleta · ' + c.cliente,
         payload: { coleta_id: c.id, notas }
       });
