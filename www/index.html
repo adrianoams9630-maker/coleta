@@ -76,6 +76,33 @@
   .badge.confirmada{background:#e7f6ec; color:var(--ok);}
   .badge.concluida{background:#e9edf6; color:var(--navy);}
   .badge.andamento{background:#fdf1e0; color:var(--warn);}
+  .badge.aguardando{background:#f1ecec; color:var(--muted);}
+  .badge.cancelada{background:#fff0f0; color:var(--red);}
+  .badge.dedicada{background:#fff4e5; color:#a35b00; margin-left:4px;}
+  .info-row{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
+  .info{font-size:11.5px; font-weight:600; background:#f6f2f2; color:var(--text); border-radius:8px; padding:4px 8px;}
+  .info.alerta{background:#fff4e5; color:#8a4b00;}
+  .obs{font-size:12px; color:var(--text); background:#fffbe9; border:1px solid #f2e3a8; border-radius:9px; padding:7px 9px; margin-top:8px; line-height:1.45;}
+  .contato-row{display:flex; gap:8px; margin-top:8px;}
+  .btn-cont{flex:1; text-align:center; text-decoration:none; font-size:12px; font-weight:700; padding:8px; border-radius:9px; border:1.4px solid var(--line); color:var(--text); background:#fff;}
+  .btn-cont.zap{color:#128c4a; border-color:#c8ecd6; background:#f1faf4;}
+  .btn-nao{display:block; width:100%; margin-top:8px; background:none; border:none; color:var(--muted); font-size:12.5px; font-weight:700; text-decoration:underline; padding:6px;}
+  .card.fechada{opacity:.72; box-shadow:none;}
+  .card.nova{animation:destaque 2.5s ease-out;}
+  @keyframes destaque{0%{box-shadow:0 0 0 3px var(--warn);}100%{box-shadow:0 4px 14px rgba(22,34,63,0.06);}}
+  .abas{display:flex; gap:6px; margin:16px 0 10px 0;}
+  .abas button{flex:1; padding:9px 6px; border-radius:10px; border:1.4px solid var(--line); background:#fff; font-weight:700; font-size:12.5px; color:var(--muted);}
+  .abas button.ativa{background:var(--navy); border-color:var(--navy); color:#fff;}
+  .motivos{display:flex; flex-direction:column; gap:7px;}
+  .motivos label{display:flex; align-items:center; gap:10px; border:1.4px solid var(--line); border-radius:10px; padding:11px; font-size:13.5px; font-weight:600;}
+  .motivos input{width:18px; height:18px; accent-color:var(--red);}
+  .sheet textarea{width:100%; border:1px solid var(--line); border-radius:10px; padding:10px; font:inherit; font-size:13.5px; min-height:64px; resize:vertical;}
+  .resumo-dia{display:flex; gap:8px; margin-top:10px;}
+  .resumo-dia div{flex:1; text-align:center; background:#f6f2f2; border-radius:10px; padding:8px 4px; font-size:10.5px; color:var(--muted); text-transform:uppercase;}
+  .resumo-dia b{display:block; font-size:17px; color:var(--text);}
+  .escolha{width:100%; border:1px solid var(--line); border-radius:10px; padding:11px; font-size:14px; background:#fff; margin-bottom:14px;}
+  .rodape-app{text-align:center; font-size:11px; color:var(--muted); margin:22px 0 8px;}
+  .rodape-app button{background:none; border:none; color:var(--navy); font-weight:700; font-size:12px; text-decoration:underline; padding:6px;}
   .btn-arrive{background:var(--ok); color:#fff;}
   .btn-arrive:active{filter:brightness(0.92);}
   .vazio{
@@ -261,7 +288,8 @@
   <div class="login-card">
     <img class="logo-full" src="data:image/jpeg;base64,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" alt="Oeste Cargas Transportadora">
     <h2>Acesso do motorista</h2>
-    <div class="sub">Entre com seu login e senha para ver a rota do dia</div>
+    <div class="sub">Entre com o mesmo usuário e senha do Portal dos usuários</div>
+    <div id="migracaoBox" style="display:none" class="login-error show"></div>
     <div class="login-field">
       <label>Login</label>
       <input type="text" id="loginUser" placeholder="joao.silva" autocomplete="username">
@@ -269,6 +297,10 @@
     <div class="login-field">
       <label>Senha</label>
       <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <div class="login-field" id="escolhaBox" style="display:none">
+      <label>Entrar como (administrador)</label>
+      <select id="loginMotorista" class="escolha"></select>
     </div>
     <div class="login-error" id="loginError">Login ou senha incorretos.</div>
     <button class="login-btn" id="btnLogin" onclick="tentarLogin()">Entrar</button>
@@ -302,8 +334,13 @@
 
   <div id="turnoBox"><!-- preenchido via JS: iniciar/encerrar rota --></div>
 
-  <div class="section-title">Coletas confirmadas</div>
+  <div class="abas" id="abas">
+    <button data-aba="fazer" class="ativa" onclick="trocarAba('fazer')">A fazer</button>
+    <button data-aba="feitas" onclick="trocarAba('feitas')">Feitas</button>
+    <button data-aba="todas" onclick="trocarAba('todas')">Todas</button>
+  </div>
   <div id="listaColetas"><!-- cards injetados via JS --></div>
+  <div class="rodape-app"><button onclick="verHistorico()">Meus últimos 7 dias</button><div id="versaoApp"></div></div>
 </main>
 
 <!-- Modal / Bottom sheet de registro -->
@@ -318,6 +355,8 @@
     <div class="field-label">Quantidade de notas e volumes</div>
     <div id="notasContainer"></div>
     <button class="add-nota" onclick="adicionarNota()">+ Adicionar outra linha</button>
+    <div class="field-label">Observação (opcional)</div>
+    <textarea id="obsColeta" maxlength="300" placeholder="Ex.: carga paletizada, avaria na caixa 3…"></textarea>
 
     <div class="field-label">Foto do recebimento da carga</div>
     <div class="photo-box" id="photoBox">
@@ -366,6 +405,40 @@
 </div>
 
 
+<!-- Modal / Bottom sheet de NÃO COLETADO -->
+<div class="overlay" id="overlayNao">
+  <div class="sheet">
+    <button class="close-x" onclick="fecharModalNao()">✕</button>
+    <div class="sheet-handle"></div>
+    <h2 id="naoCliente">Cliente</h2>
+    <div class="sub">Coleta não realizada — o escritório recebe o motivo na hora.</div>
+    <div class="field-label">Motivo</div>
+    <div class="motivos" id="naoMotivos">
+      <label><input type="radio" name="naoMotivo" value="fechado"> Cliente fechado</label>
+      <label><input type="radio" name="naoMotivo" value="sem_carga"> Cliente sem carga</label>
+      <label><input type="radio" name="naoMotivo" value="carga_nao_pronta"> Carga não estava pronta</label>
+      <label><input type="radio" name="naoMotivo" value="recusou"> Cliente recusou a coleta</label>
+      <label><input type="radio" name="naoMotivo" value="nao_encontrado"> Endereço não encontrado</label>
+      <label><input type="radio" name="naoMotivo" value="sem_tempo"> Não deu tempo na rota</label>
+      <label><input type="radio" name="naoMotivo" value="outro"> Outro motivo</label>
+    </div>
+    <div class="field-label">Detalhe</div>
+    <textarea id="naoDetalhe" maxlength="300" placeholder="Obrigatório em “Outro motivo”"></textarea>
+    <div class="field-label">Foto (opcional)</div>
+    <div class="photo-box" id="photoBoxNao">
+      <div id="photoPlaceholderNao">
+        📷<br>
+        <label class="photo-btn" for="fotoNaoInput">Tirar foto</label>
+        <div class="photo-hint">Ex.: portão fechado, fachada</div>
+      </div>
+      <img id="photoPreviewNao" style="display:none;">
+      <input type="file" id="fotoNaoInput" accept="image/*" capture="environment" style="display:none;"
+             onchange="mostrarPreview(event.target.files[0], 'photoPreviewNao', 'photoPlaceholderNao', 'photoBoxNao')">
+    </div>
+    <button class="btn btn-primary sheet-submit" id="btnNao" onclick="enviarNaoColetado()">Registrar não coletado</button>
+  </div>
+</div>
+
 <!-- Diálogo e aviso rápido (substituem alert/confirm) -->
 <div class="dlg-overlay" id="dlgOverlay">
   <div class="dlg">
@@ -386,10 +459,13 @@
   //  abertura), então o app abre e funciona sem sinal. Tudo que o
   //  motorista faz vira um EVENTO numa fila salva no celular:
   //
-  //    turno_iniciar · chegada · registrar · turno_encerrar
+  //    turno_iniciar · chegada · registrar · nao_coletado · turno_encerrar · posicao
+  //
+  //  VERSÃO 3 — fala com o Controle de Coleta v2 (POST /webhook/oeste-coletas2-motorista,
+  //  WF39): login com o usuário do Portal dos usuários, coletas lançadas na v2.
   //
   //  A tela atualiza na hora (como se já tivesse enviado) e a fila é
-  //  enviada, EM ORDEM, para POST /webhook/motorista-sync (WF 21)
+  //  enviada, EM ORDEM, para o servidor
   //  sempre que houver conexão. Cada evento tem um UUID gerado aqui:
   //  se o envio cair no meio e for repetido, o servidor reconhece e
   //  não duplica nada.
@@ -398,8 +474,11 @@
   //    Preferences  → sessão, lista do dia, fila de eventos
   //    Filesystem   → fotos (JPEG comprimido), uma por evento
   // ============================================================
+  const VERSAO_APP = '3.0';
   const CONFIG = {
     API: 'https://n8n.paideguasistema.com.br/webhook',
+    ROTA_APP: '/oeste-coletas2-motorista',      // Controle de Coleta v2
+    ROTA_SYNC_ANTIGA: '/motorista-sync',        // só para esvaziar a fila da versão 2 ao atualizar
     INTERVALO_CICLO_MS: 30000,
     TIMEOUT_LISTA_MS: 20000,
     TIMEOUT_ENVIO_MS: 90000,     // foto em 3G fraco pode demorar
@@ -500,6 +579,13 @@
       try { data = txt ? JSON.parse(txt) : null; } catch (e) { data = null; }
       return { status: r.status, data };
     } finally { clearTimeout(t); }
+  }
+
+  // Chamada à API do app na v2: sempre POST com { acao, token, ... }
+  async function api(acao, dados, timeoutMs) {
+    const r = await http('POST', CONFIG.ROTA_APP, { ...(dados || {}), acao, token: SESSAO.token }, timeoutMs || CONFIG.TIMEOUT_LISTA_MS);
+    if (r.data && r.data.sessao_expirada) { sessaoExpirada(); throw Object.assign(new Error('sessao'), { sessao: true }); }
+    return r;
   }
 
   // ------------------------------------------------------------
@@ -608,11 +694,11 @@
   let TURNO = { saida_base: null, retorno_base: null };
   let ONLINE = null;            // null = ainda não sabemos
   let sincronizando = false;
+  let sincronizarDeNovo = false;
   let geracaoSync = 0;          // muda a cada evento confirmado pelo servidor
 
   // Quantidade de notas e volumes de cada coleta concluída, guardada no
-  // celular. A lista do servidor (/coletas-motorista) só traz a contagem de
-  // notas; os volumes vêm do registro feito aqui ou da Auditoria.
+  // celular (a lista do servidor já traz os dois; isto cobre o envio pendente).
   let REGISTROS = {};
   async function salvarRegistros() { await Store.set('registros', REGISTROS); }
 
@@ -629,15 +715,19 @@
     }
     const c = alvoColetas.find(x => x.id === ev.coleta_id);
     if (!c) return;
-    if (ev.tipo === 'chegada' && c.status === 'confirmada') {
+    if (ev.tipo === 'chegada' && (c.status === 'confirmada' || c.status === 'aguardando_resposta')) {
       c.status = 'em_andamento';
       c.iniciada_em = c.iniciada_em || ev.resultado?.iniciada_em || ev.capturado_em;
+    }
+    if (ev.tipo === 'nao_coletado' && c.status !== 'concluida') {
+      c.status = 'recusada';
+      c.motivo = 'Não coletado: ' + (ev.payload.motivo_texto || ev.payload.motivo);
     }
     if (ev.tipo === 'registrar' && c.status !== 'concluida') {
       c.status = 'concluida';
       c.iniciada_em = c.iniciada_em || ev.capturado_em;
       c.concluida_em = ev.resultado?.concluida_em || ev.capturado_em;
-      c.notas_count = ev.payload.quantidade_notas ?? (ev.payload.notas || []).length;
+      c.quantidade_notas = ev.payload.quantidade_notas ?? (ev.payload.notas || []).length;
       if (ev.payload.quantidade_volumes != null) c.quantidade_volumes = ev.payload.quantidade_volumes;
     }
     if (marcarPendente) c._pendente = true;
@@ -672,6 +762,7 @@
     FILA.push(ev);
     await salvarFila();
     recomputar();
+    if (sincronizando) sincronizarDeNovo = true;   // o envio em andamento não viu este: repete no fim
     sincronizar(); // não espera: a tela já está atualizada
   }
 
@@ -682,7 +773,7 @@
   //  "recusados" e o motorista vê o motivo.
   // ------------------------------------------------------------
   async function sincronizar() {
-    if (sincronizando || !SESSAO.motoristaId) return;
+    if (sincronizando || !SESSAO.motoristaId || !SESSAO.token) return;
     const pendentes = FILA.filter(e => e.estado === 'pendente');
     if (pendentes.length === 0) return;
 
@@ -696,7 +787,6 @@
           ...ev.payload,
           client_uuid: ev.uuid,
           tipo: ev.tipo,
-          motorista_id: ev.motorista_id,
           capturado_em: ev.capturado_em
         };
         if (ev.foto) {
@@ -728,8 +818,9 @@
 
         let res;
         try {
-          res = await http('POST', '/motorista-sync', corpo, CONFIG.TIMEOUT_ENVIO_MS);
+          res = await api('sync', corpo, CONFIG.TIMEOUT_ENVIO_MS);
         } catch (e) {
+          if (e && e.sessao) break;  // sessão terminou: o resto espera o novo login
           ONLINE = false;
           break; // sem conexão — o resto espera
         }
@@ -784,6 +875,7 @@
     } finally {
       sincronizando = false;
       recomputar();
+      if (sincronizarDeNovo && ONLINE !== false) { sincronizarDeNovo = false; setTimeout(sincronizar, 0); }
     }
   }
 
@@ -854,45 +946,13 @@
   }
 
   // ------------------------------------------------------------
-  //  LISTA DO DIA — GET /webhook/coletas-motorista (WF 10)
+  //  LISTA DO DIA — POST /webhook/oeste-coletas2-motorista { acao: "dia" }
   // ------------------------------------------------------------
-  // Coletas concluídas sem notas/volumes guardados no celular (registradas
-  // em outro aparelho, ou antes desta versão): busca na Auditoria, que tem
-  // os dois por id da coleta, e guarda para funcionar também sem sinal.
-  async function completarRegistros(lista) {
-    const faltando = (lista || []).filter(c => c.status === 'concluida'
-      && (!REGISTROS[c.id] || REGISTROS[c.id].volumes == null));
-    if (!faltando.length) return;
-    try {
-      const r = await http('GET', '/listar?entidade=auditoria', null, CONFIG.TIMEOUT_LISTA_MS);
-      const dados = (r.data && r.data.dados) || [];
-      const porId = {};
-      dados.forEach(a => { if (a.id != null) porId[a.id] = a; });
-      let mudou = false;
-      faltando.forEach(c => {
-        const a = porId[c.id];
-        if (!a || a.volumes == null) return;
-        REGISTROS[c.id] = { notas: Number(a.notas), volumes: Number(a.volumes), dia: hojeLocal() };
-        mudou = true;
-      });
-      if (mudou) {
-        // Guarda só os dos últimos dias, para a chave não crescer sem fim.
-        const ids = Object.keys(REGISTROS);
-        if (ids.length > 300) ids.slice(0, ids.length - 300).forEach(k => delete REGISTROS[k]);
-        await salvarRegistros();
-        recomputar();
-      }
-    } catch (e) {
-      console.warn('Falha ao buscar notas e volumes', e); // o card mostra o que tiver
-    }
-  }
-
   async function carregarColetas(silencioso = false) {
-    if (!SESSAO.motoristaId) return;
+    if (!SESSAO.motoristaId || !SESSAO.token) return;
     const geracaoAntes = geracaoSync;
     try {
-      const r = await http('GET', '/coletas-motorista?motorista_id=' + encodeURIComponent(SESSAO.motoristaId),
-                           null, CONFIG.TIMEOUT_LISTA_MS);
+      const r = await api('dia', {}, CONFIG.TIMEOUT_LISTA_MS);
       ONLINE = true;
       if (r.status < 200 || r.status >= 300 || !r.data) {
         throw new Error((r.data && r.data.mensagem) || 'Erro ' + r.status + ' no servidor.');
@@ -902,16 +962,20 @@
       if (geracaoSync !== geracaoAntes) return carregarColetas(true);
 
       const data = r.data;
+      if (!data.sucesso) throw new Error(data.mensagem || 'Erro no servidor.');
+      const antes = BASE.dia === hojeLocal() ? BASE.coletas : null;
       BASE = {
-        dia: hojeLocal(),
-        coletas: Array.isArray(data) ? data : (data.coletas || []),
+        dia: data.dia || hojeLocal(),
+        coletas: data.coletas || [],
         turno: data.turno || { saida_base: null, retorno_base: null },
         atualizado_em: new Date().toISOString()
       };
+      if (data.marca) aplicarMarca(data.marca);
       await salvarBase();
+      avisarMudancas(antes, BASE.coletas);
       recomputar();
-      await completarRegistros(BASE.coletas);
     } catch (e) {
+      if (e && e.sessao) return;
       console.warn('Falha ao carregar coletas', e);
       if (e && /Sem conexão|Failed to fetch|abort|timeout|network/i.test(String(e.message || e.name))) ONLINE = false;
       renderStatus();
@@ -930,11 +994,76 @@
     }
   }
 
+  // Coleta nova atribuída / cancelada pelo escritório desde a última lista: avisa o motorista
+  let NOVAS = new Set();
+  function avisarMudancas(antes, depois) {
+    if (!antes) return;
+    const ant = new Map(antes.map(c => [c.id, c]));
+    const novas = depois.filter(c => !ant.has(c.id) && !['cancelada', 'recusada', 'concluida'].includes(c.status));
+    const canceladas = depois.filter(c => c.status === 'cancelada' && ant.has(c.id) && ant.get(c.id).status !== 'cancelada');
+    const confirmadas = depois.filter(c => c.status === 'confirmada' && ant.has(c.id) && ant.get(c.id).status === 'aguardando_resposta');
+    novas.forEach(c => NOVAS.add(c.id));
+    const msgs = [];
+    if (novas.length) msgs.push(novas.length === 1 ? 'Nova coleta: ' + novas[0].cliente : novas.length + ' coletas novas na sua rota');
+    if (confirmadas.length) msgs.push(confirmadas.length === 1 ? 'Cliente confirmou: ' + confirmadas[0].cliente : confirmadas.length + ' clientes confirmaram');
+    if (canceladas.length) msgs.push(canceladas.length === 1 ? 'Coleta cancelada: ' + canceladas[0].cliente : canceladas.length + ' coletas canceladas');
+    if (!msgs.length) return;
+    toast(msgs.join(' · '), canceladas.length ? 'erro' : 'ok');
+    try { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); } catch (e) {}
+    if (NATIVO && PL.LocalNotifications && document.visibilityState !== 'visible') {
+      PL.LocalNotifications.schedule({ notifications: [{ id: Date.now() % 2147483647, title: 'Oeste Cargas · coletas', body: msgs.join(' · ') }] }).catch(() => {});
+    }
+  }
+
+  function aplicarMarca(m) {
+    if (!m) return;
+    if (m.logo) document.querySelectorAll('.logo-full').forEach(img => { if (img.src !== m.logo) img.src = m.logo; });
+    Store.set('marca', m);
+  }
+
+  let avisandoSessao = false;
+  async function sessaoExpirada() {
+    if (avisandoSessao) return;
+    avisandoSessao = true;
+    pararCiclos();
+    // a fila e a lista ficam no celular: depois do novo login, tudo continua de onde parou
+    SESSAO = { ...SESSAO, token: null };
+    await Store.set('sessao', SESSAO);
+    document.getElementById('appRoot').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+    const pend = FILA.filter(e => e.estado === 'pendente' && e.tipo !== 'posicao').length;
+    const err = document.getElementById('loginError');
+    err.textContent = 'Sua sessão terminou. Entre de novo' + (pend ? ` — ${pend} registro(s) guardado(s) no celular serão enviados em seguida.` : '.');
+    err.classList.add('show');
+    avisandoSessao = false;
+  }
+
+  let ABA = 'fazer';
+  function trocarAba(a) {
+    ABA = a;
+    document.querySelectorAll('#abas button').forEach(b => b.classList.toggle('ativa', b.dataset.aba === a));
+    renderLista();
+  }
+
+  async function verHistorico() {
+    try {
+      const r = await api('historico', {});
+      const dias = (r.data && r.data.dias) || [];
+      if (!dias.length) return avisar('Nenhuma coleta nos últimos 7 dias.');
+      await avisar('Últimos 7 dias\n\n' + dias.map(d => {
+        const dt = new Date(d.data + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' });
+        return `${dt}: ${d.concluidas}/${d.coletas} coletas · ${d.notas} NF · ${d.volumes} vol.` + (d.nao_coletadas ? ` · ${d.nao_coletadas} não coletada(s)` : '');
+      }).join('\n'));
+    } catch (e) {
+      if (!(e && e.sessao)) avisar('Sem conexão agora. Tente de novo com internet.');
+    }
+  }
+
   // Um ciclo = envia o que estiver na fila e depois atualiza a lista.
   // Nessa ordem de propósito: assim a lista que chega já contém o que
   // acabou de ser enviado.
   async function ciclo(silencioso = true) {
-    if (!SESSAO.motoristaId) return;
+    if (!SESSAO.motoristaId || !SESSAO.token) return;
     await sincronizar();
     if (!algumModalAberto()) await carregarColetas(silencioso);
   }
@@ -956,7 +1085,7 @@
   }
 
   function algumModalAberto() {
-    return ['overlay', 'overlayChegada', 'dlgOverlay']
+    return ['overlay', 'overlayChegada', 'overlayNao', 'dlgOverlay']
       .some(id => document.getElementById(id).classList.contains('open'));
   }
 
@@ -978,6 +1107,7 @@
         if (document.getElementById('dlgOverlay').classList.contains('open')) return;
         if (document.getElementById('overlay').classList.contains('open')) return fecharModal();
         if (document.getElementById('overlayChegada').classList.contains('open')) return fecharModalChegada();
+        if (document.getElementById('overlayNao').classList.contains('open')) return fecharModalNao();
         PL.App.minimizeApp();
       });
     }
@@ -1051,18 +1181,25 @@
     if (TURNO.retorno_base) {
       const duracaoMin = TURNO.saida_base
         ? (new Date(TURNO.retorno_base) - new Date(TURNO.saida_base)) / 60000 : null;
+      const feitas = coletas.filter(c => c.status === 'concluida');
       box.className = 'turno-box';
       box.innerHTML = `
         <div class="turno-status">
           <span class="dot parado"></span>
           Rota encerrada às ${formatarHorario(TURNO.retorno_base)} · Duração total: ${formatarDuracao(duracaoMin)}
+        </div>
+        <div class="resumo-dia">
+          <div><b>${feitas.length}</b>coletas</div>
+          <div><b>${feitas.reduce((t, c) => t + (Number(c.quantidade_notas) || 0), 0)}</b>notas</div>
+          <div><b>${feitas.reduce((t, c) => t + (Number(c.quantidade_volumes) || 0), 0)}</b>volumes</div>
+          <div><b>${coletas.filter(c => c.status === 'recusada').length}</b>não colet.</div>
         </div>`;
       return;
     }
 
     if (TURNO.saida_base) {
       const pendentes = coletas.filter(c => c.status === 'confirmada' || c.status === 'em_andamento').length;
-      const podeEncerrar = pendentes === 0 && coletas.length > 0;
+      const podeEncerrar = pendentes === 0;
       box.className = 'turno-box';
       box.innerHTML = `
         <div class="turno-status"><span class="dot"></span>Rota iniciada às ${formatarHorario(TURNO.saida_base)}</div>
@@ -1070,7 +1207,7 @@
           🏁 Encerrar rota
         </button>
         ${!podeEncerrar ? `<div class="turno-hint">${
-          coletas.length === 0 ? 'Sem coletas hoje ainda.' : `Finalize ${pendentes} coleta(s) pendente(s) para encerrar.`
+          `Finalize ou marque como não coletada ${pendentes} coleta(s) para encerrar.`
         }</div>` : ''}`;
       return;
     }
@@ -1230,7 +1367,7 @@
 
   async function encerrarRota() {
     const pendentes = coletas.filter(c => c.status === 'confirmada' || c.status === 'em_andamento').length;
-    if (pendentes > 0) { await avisar(`Ainda há ${pendentes} coleta(s) pendente(s). Finalize antes de encerrar a rota.`); return; }
+    if (pendentes > 0) { await avisar(`Ainda há ${pendentes} coleta(s) pendente(s). Finalize ou marque como não coletada antes de encerrar a rota.`); return; }
     if (!(await confirmarAcao('Confirmar retorno à transportadora?', 'Encerrar rota'))) return;
     if (RASTREIO.ultimaFix && rastreioDeveriaEstarAtivo()) {
       await registrarPosicao(RASTREIO.ultimaFix, new Date().toISOString());
@@ -1242,8 +1379,37 @@
   // ============================================================
   //  LISTA
   // ============================================================
+  function linkNavegacao(c) {
+    const temCoord = c.lat != null && c.lng != null;
+    const destinoMaps = temCoord ? `${c.lat},${c.lng}` : encodeURIComponent(c.endereco || '');
+    const urlWazeWeb = temCoord ? `https://waze.com/ul?ll=${c.lat},${c.lng}&navigate=yes` : `https://waze.com/ul?q=${encodeURIComponent(c.endereco || '')}&navigate=yes`;
+    const urlWazeApp = temCoord ? `waze://ul?ll=${c.lat},${c.lng}&navigate=yes` : `waze://ul?q=${encodeURIComponent(c.endereco || '')}&navigate=yes`;
+    return `<div class="nav-row">
+         <a class="btn-nav gmaps" href="https://www.google.com/maps/dir/?api=1&destination=${destinoMaps}" target="_blank" rel="noopener">🗺️ Maps</a>
+         <a class="btn-nav waze" href="#" onclick="abrirWaze(event, '${urlWazeApp}', '${urlWazeWeb}')">🚗 Waze</a>
+       </div>`;
+  }
+
+  function linkContato(c) {
+    const fone = c.telefone || c.whatsapp, zap = c.whatsapp;
+    if (!fone && !zap) return '';
+    const intl = n => (String(n).length <= 11 ? '55' : '') + n;
+    return `<div class="contato-row">
+      ${fone ? `<a class="btn-cont" href="tel:${esc(fone)}">📞 Ligar${c.contato ? ' · ' + esc(c.contato.split(' ')[0]) : ''}</a>` : ''}
+      ${zap ? `<a class="btn-cont zap" href="https://wa.me/${esc(intl(zap))}" target="_blank" rel="noopener">💬 WhatsApp</a>` : ''}
+    </div>`;
+  }
+
+  const ABERTA = c => ['confirmada', 'em_andamento', 'aguardando_resposta'].includes(c.status);
+
   function renderLista() {
     const cont = document.getElementById('listaColetas');
+    const pend = coletas.filter(ABERTA).length, feitas = coletas.filter(c => c.status === 'concluida').length;
+    document.getElementById('statPend').textContent = pend;
+    document.getElementById('statOk').textContent = feitas;
+    document.getElementById('statTotal').textContent = coletas.filter(c => c.status !== 'cancelada').length;
+    document.querySelector('#abas [data-aba="fazer"]').textContent = 'A fazer' + (pend ? ' · ' + pend : '');
+    document.querySelector('#abas [data-aba="feitas"]').textContent = 'Feitas' + (feitas ? ' · ' + feitas : '');
 
     if (coletas.length === 0) {
       cont.innerHTML = BASE.atualizado_em ? `
@@ -1251,88 +1417,86 @@
           <div class="vazio-ico">📋</div>
           <div class="vazio-titulo">Nenhuma coleta para hoje</div>
           <div class="vazio-texto">
-            Aparecem aqui as coletas confirmadas pelo cliente e atribuídas a você.
+            Aparecem aqui as coletas da sua rota lançadas pelo escritório.
             Se você esperava ver alguma, fale com o escritório.
           </div>
           <button class="btn-ghost-mob" onclick="atualizarManual()">Atualizar</button>
         </div>` : '';
-      document.getElementById('statPend').textContent = 0;
-      document.getElementById('statOk').textContent = 0;
-      document.getElementById('statTotal').textContent = 0;
+      return;
+    }
+
+    const lista = coletas.filter(c => ABA === 'todas' || (ABA === 'fazer' ? ABERTA(c) : !ABERTA(c)));
+    if (!lista.length) {
+      cont.innerHTML = `<div class="vazio"><div class="vazio-ico">${ABA === 'fazer' ? '✅' : '📋'}</div>
+        <div class="vazio-titulo">${ABA === 'fazer' ? 'Nada pendente' : 'Nenhuma coleta feita ainda'}</div>
+        <div class="vazio-texto">${ABA === 'fazer' ? 'Todas as coletas de hoje foram registradas.' : 'As coletas registradas aparecem aqui.'}</div></div>`;
       return;
     }
 
     let html = '';
-    coletas.forEach(c => {
-      let badge, acao, extra = '';
+    lista.forEach(c => {
+      let badge, acao = '', extra = '', fechada = false;
 
       if (c.status === 'concluida') {
         badge = '<span class="badge concluida">✓ Concluída</span>';
-        acao  = '<button class="btn btn-disabled" disabled>Coleta já registrada</button>';
+        fechada = true;
         const partes = [];
         if (c.iniciada_em && c.concluida_em) {
           const mins = (new Date(c.concluida_em) - new Date(c.iniciada_em)) / 60000;
           partes.push(`Tempo no cliente: ${formatarDuracao(mins)}`);
         }
-        const qtdNotas = c.quantidade_notas != null ? Number(c.quantidade_notas)
-                       : (c.notas_count != null ? Number(c.notas_count) : null);
-        if (qtdNotas != null) {
-          partes.push(qtdNotas + (qtdNotas === 1 ? ' nota fiscal' : ' notas fiscais'));
-        }
-        if (c.quantidade_volumes != null) {
-          const qtdVol = Number(c.quantidade_volumes);
-          partes.push(qtdVol + (qtdVol === 1 ? ' volume' : ' volumes'));
-        }
+        if (c.quantidade_notas != null) { const q = Number(c.quantidade_notas); partes.push(q + (q === 1 ? ' nota fiscal' : ' notas fiscais')); }
+        if (c.quantidade_volumes != null) { const v = Number(c.quantidade_volumes); partes.push(v + (v === 1 ? ' volume' : ' volumes')); }
         if (partes.length) extra = `<div class="done-row">${partes.join(' · ')}</div>`;
+
+      } else if (c.status === 'recusada' || c.status === 'cancelada') {
+        badge = c.status === 'cancelada' ? '<span class="badge cancelada">Cancelada</span>' : '<span class="badge cancelada">Não coletada</span>';
+        fechada = true;
+        extra = c.motivo ? `<div class="done-row">${esc(c.motivo)}</div>` : (c.status === 'cancelada' ? '<div class="done-row">Cancelada pelo escritório.</div>' : '');
 
       } else if (c.status === 'em_andamento') {
         badge = '<span class="badge andamento">Em andamento</span>';
-        acao  = `<button class="btn btn-primary" onclick="abrirModal(${c.id})">Finalizar coleta</button>`;
+        acao  = `<button class="btn btn-primary" onclick="abrirModal(${c.id})">Finalizar coleta</button>
+                 <button class="btn-nao" onclick="abrirModalNao(${c.id})">Não foi possível coletar</button>`;
         extra = `<div class="timer-row"><span class="dot"></span><span data-timer="${c.id}">no cliente há ${formatarDuracao(minutosDesde(c.iniciada_em))}</span></div>`;
 
       } else {
-        badge = '<span class="badge confirmada">Confirmada</span>';
-        acao  = `<button class="btn btn-arrive" onclick="abrirModalChegada(${c.id})">Confirmar chegada</button>`;
+        badge = c.status === 'aguardando_resposta'
+          ? '<span class="badge aguardando">Aguardando cliente</span>'
+          : '<span class="badge confirmada">Confirmada</span>';
+        acao  = `<button class="btn btn-arrive" onclick="abrirModalChegada(${c.id})">Confirmar chegada</button>
+                 <button class="btn-nao" onclick="abrirModalNao(${c.id})">Não foi possível coletar</button>`;
       }
 
-      let linkNav = '';
-      if (c.status === 'confirmada') {
-        const temCoord = c.lat != null && c.lng != null;
-        const destinoMaps = temCoord ? `${c.lat},${c.lng}` : encodeURIComponent(c.endereco || '');
-        const urlWazeWeb = temCoord
-          ? `https://waze.com/ul?ll=${c.lat},${c.lng}&navigate=yes`
-          : `https://waze.com/ul?q=${encodeURIComponent(c.endereco || '')}&navigate=yes`;
-        const urlWazeApp = temCoord
-          ? `waze://ul?ll=${c.lat},${c.lng}&navigate=yes`
-          : `waze://ul?q=${encodeURIComponent(c.endereco || '')}&navigate=yes`;
-        linkNav = `<div class="nav-row">
-             <a class="btn-nav gmaps" href="https://www.google.com/maps/dir/?api=1&destination=${destinoMaps}" target="_blank" rel="noopener">🗺️ Maps</a>
-             <a class="btn-nav waze" href="#" onclick="abrirWaze(event, '${urlWazeApp}', '${urlWazeWeb}')">🚗 Waze</a>
-           </div>`;
-      }
+      const infos = [];
+      if (c.janela) infos.push(`<span class="info">🕘 ${esc(c.janela)}</span>`);
+      if (c.volumes_previstos) infos.push(`<span class="info">📦 ${esc(c.volumes_previstos)} vol. informados pelo cliente</span>`);
+      if (c.tipo_carga) infos.push(`<span class="info">${esc(c.tipo_carga)}</span>`);
+      if (c.exige_agendamento) infos.push('<span class="info alerta">Exige agendamento</span>');
+      const obs = [c.restricoes, c.referencia ? 'Ref.: ' + c.referencia : null, c.observacao].filter(Boolean);
+      const aberta = ABERTA(c) && c.status !== 'em_andamento';
 
       const tagPend = c._pendente ? '<div class="pend-tag">⏳ Salvo no celular · aguardando envio</div>' : '';
 
       html += `
-        <div class="card">
+        <div class="card${fechada ? ' fechada' : ''}${NOVAS.has(c.id) ? ' nova' : ''}">
           <div class="card-head">
             <div>
-              <div class="name">${esc(c.cliente)}</div>
-              <div class="addr">${esc(c.endereco)}</div>
+              <div class="name">${esc(c.cliente)}${c.classificacao === 'dedicada' ? '<span class="badge dedicada">Dedicada</span>' : ''}</div>
+              <div class="addr">${esc(c.endereco || 'Endereço não cadastrado')}</div>
             </div>
             ${badge}
           </div>
-          ${linkNav}
+          ${!fechada && infos.length ? `<div class="info-row">${infos.join('')}</div>` : ''}
+          ${!fechada && obs.length ? `<div class="obs">${obs.map(esc).join('<br>')}</div>` : ''}
+          ${aberta ? linkNavegacao(c) + linkContato(c) : (c.status === 'em_andamento' ? linkContato(c) : '')}
           ${extra}
           ${tagPend}
-          <div class="card-actions">${acao}</div>
+          ${acao ? `<div class="card-actions">${acao}</div>` : ''}
         </div>`;
     });
     cont.innerHTML = html;
-
-    document.getElementById('statPend').textContent = coletas.filter(c => c.status !== 'concluida').length;
-    document.getElementById('statOk').textContent = coletas.filter(c => c.status === 'concluida').length;
-    document.getElementById('statTotal').textContent = coletas.length;
+    setTimeout(() => NOVAS.clear(), 3000);
   }
 
   // Esquema waze:// abre o app nativo; se não abrir, cai no link web.
@@ -1495,6 +1659,7 @@
       c.iniciada_em ? 'No cliente há ' + formatarDuracao(minutosDesde(c.iniciada_em)) : '';
     document.getElementById('notasContainer').innerHTML = '';
     adicionarNota();
+    document.getElementById('obsColeta').value = '';
     document.getElementById('photoPreview').style.display = 'none';
     document.getElementById('photoPlaceholder').style.display = 'block';
     document.getElementById('photoBox').classList.remove('has-photo');
@@ -1504,6 +1669,59 @@
 
   function fecharModal() {
     document.getElementById('overlay').classList.remove('open');
+  }
+
+  // ============================================================
+  //  NÃO COLETADO — motivo (+ foto opcional) → o escritório vê na hora
+  // ============================================================
+  let naoAtualId = null;
+  function abrirModalNao(id) {
+    const c = coletas.find(x => x.id === id);
+    if (!c) return;
+    naoAtualId = id;
+    document.getElementById('naoCliente').textContent = c.cliente;
+    document.querySelectorAll('input[name="naoMotivo"]').forEach(r => { r.checked = false; });
+    document.getElementById('naoDetalhe').value = '';
+    document.getElementById('fotoNaoInput').value = '';
+    document.getElementById('photoPreviewNao').style.display = 'none';
+    document.getElementById('photoPlaceholderNao').style.display = 'block';
+    document.getElementById('photoBoxNao').classList.remove('has-photo');
+    chegadaGeo = { lat: null, lng: null, status: null };
+    if (navigator.geolocation) navigator.geolocation.getCurrentPosition(
+      pos => { chegadaGeo = { lat: pos.coords.latitude, lng: pos.coords.longitude, status: 'ok' }; }, () => {},
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
+    document.getElementById('overlayNao').classList.add('open');
+  }
+  function fecharModalNao() { document.getElementById('overlayNao').classList.remove('open'); }
+
+  async function enviarNaoColetado() {
+    const c = coletas.find(x => x.id === naoAtualId);
+    if (!c) return;
+    const sel = document.querySelector('input[name="naoMotivo"]:checked');
+    const detalhe = document.getElementById('naoDetalhe').value.trim();
+    if (!sel) { await avisar('Escolha o motivo.'); return; }
+    if (sel.value === 'outro' && detalhe.length < 3) { await avisar('Descreva o motivo no campo Detalhe.'); document.getElementById('naoDetalhe').focus(); return; }
+    if (!(await confirmarAcao(`Registrar que a coleta de ${c.cliente} NÃO foi feita?`, 'Registrar'))) return;
+    const btn = document.getElementById('btnNao');
+    btn.disabled = true; btn.textContent = 'Salvando...';
+    try {
+      const uuid = novoUuid();
+      const foto = document.getElementById('fotoNaoInput').files[0];
+      let nomeFoto = null;
+      if (foto) { nomeFoto = uuid + '.jpg'; await Store.salvarFoto(nomeFoto, await comprimirFoto(foto)); }
+      await enfileirar({
+        uuid, tipo: 'nao_coletado', coleta_id: c.id, foto: nomeFoto,
+        rotulo: 'Não coletado · ' + c.cliente,
+        payload: { coleta_id: c.id, motivo: sel.value, motivo_texto: sel.parentElement.textContent.trim(), detalhe,
+                   lat: chegadaGeo.lat, lng: chegadaGeo.lng }
+      });
+      fecharModalNao();
+      toast(ONLINE === false ? 'Salvo no celular. Envia quando tiver sinal.' : 'Registrado. O escritório já pode ver o motivo.', 'ok');
+    } catch (e) {
+      await avisar('Não foi possível salvar no celular: ' + (e.message || e));
+    } finally {
+      btn.disabled = false; btn.textContent = 'Registrar não coletado';
+    }
   }
 
   function adicionarNota(valores) {
@@ -1613,7 +1831,8 @@
         coleta_id: c.id,
         foto: nomeFoto,
         rotulo: 'Coleta · ' + c.cliente,
-        payload: { coleta_id: c.id, notas, quantidade_notas: totalNotas, quantidade_volumes: totalVolumes }
+        payload: { coleta_id: c.id, notas, quantidade_notas: totalNotas, quantidade_volumes: totalVolumes,
+                   observacao: document.getElementById('obsColeta').value.trim() || null }
       });
       REGISTROS[c.id] = { notas: totalNotas, volumes: totalVolumes, dia: hojeLocal() };
       await salvarRegistros();
@@ -1639,19 +1858,39 @@
     const pass = document.getElementById('loginPass').value;
     const errEl = document.getElementById('loginError');
     const btn = document.getElementById('btnLogin');
+    const escolha = document.getElementById('escolhaBox').style.display !== 'none' ? document.getElementById('loginMotorista').value : '';
 
     if (!user || !pass) { errEl.textContent = 'Informe usuário e senha.'; errEl.classList.add('show'); return; }
+    if (FILA.some(e => e.estado === 'pendente' && e.tipo !== 'posicao' && SESSAO.motoristaId == null)) {
+      errEl.textContent = 'Ainda há registros da versão anterior para enviar. Conecte-se à internet e aguarde.'; errEl.classList.add('show'); return;
+    }
 
     btn.disabled = true; btn.textContent = 'Entrando...';
     try {
-      const r = await http('POST', '/auth-login', { tipo: 'motorista', login: user, senha: pass }, 20000);
+      const disp = (navigator.userAgent.match(/Android [\d.]+;[^;)]*/) || [navigator.userAgent])[0].slice(0, 150);
+      const r = await http('POST', CONFIG.ROTA_APP, { acao: 'login', login: user, senha: pass, dispositivo: 'App ' + VERSAO_APP + ' · ' + disp,
+                                                      funcionario_id: escolha || undefined }, 20000);
       const data = r.data || {};
       if (r.status >= 200 && r.status < 300 && data.sucesso) {
-        SESSAO = { motoristaId: data.id, nome: data.nome, token: data.token || null };
+        // outro motorista neste aparelho: o que estava salvo era do anterior
+        if (SESSAO.motoristaId && SESSAO.motoristaId !== data.id) {
+          const pend = FILA.filter(e => e.estado === 'pendente' && e.tipo !== 'posicao').length;
+          if (pend && !(await confirmarAcao(`Há ${pend} registro(s) não enviado(s) de ${SESSAO.nome}. Entrar como ${data.nome} descarta esses registros. Continuar?`, 'Continuar'))) return;
+          FILA = []; BASE = { dia: null, coletas: [], turno: { saida_base: null, retorno_base: null }, atualizado_em: null };
+          await Store.set('fila', FILA); await Store.set('base', BASE); await Store.apagarTodasFotos();
+        }
+        SESSAO = { motoristaId: data.id, nome: data.nome, token: data.token, versao: 3 };
         await Store.set('sessao', SESSAO);
+        if (data.marca) aplicarMarca(data.marca);
         errEl.classList.remove('show');
+        document.getElementById('escolhaBox').style.display = 'none';
         document.getElementById('loginPass').value = '';
         await entrarNoApp();
+      } else if (data.escolher) {
+        const sel = document.getElementById('loginMotorista');
+        sel.innerHTML = '<option value="">— escolha o motorista —</option>' + (data.motoristas || []).map(m => `<option value="${m.id}">${esc(m.nome)}</option>`).join('');
+        document.getElementById('escolhaBox').style.display = 'block';
+        errEl.textContent = data.mensagem || 'Escolha o motorista.'; errEl.classList.add('show');
       } else {
         errEl.textContent = data.mensagem || 'Usuário ou senha inválidos.';
         errEl.classList.add('show');
@@ -1664,10 +1903,59 @@
     }
   }
 
+  // ------------------------------------------------------------
+  //  ATUALIZAÇÃO da versão 2 (sistema antigo) para a 3 (v2):
+  //  registros que ficaram no celular são enviados primeiro para o
+  //  servidor antigo (são de coletas do sistema antigo); depois o
+  //  motorista entra com o usuário do Portal dos usuários.
+  // ------------------------------------------------------------
+  async function esvaziarFilaAntiga(antiga) {
+    const box = document.getElementById('migracaoBox');
+    let pend = FILA.filter(e => e.estado === 'pendente' && e.tipo !== 'posicao');
+    if (!pend.length) return true;
+    box.style.display = 'block';
+    box.textContent = `Enviando ${pend.length} registro(s) da versão anterior…`;
+    for (const ev of pend) {
+      const corpo = { ...ev.payload, client_uuid: ev.uuid, tipo: ev.tipo, motorista_id: ev.motorista_id || antiga.motoristaId, capturado_em: ev.capturado_em };
+      if (ev.foto) { try { const b64 = await Store.lerFoto(ev.foto); if (b64) { corpo.foto_base64 = b64; corpo.mime_type = 'image/jpeg'; } } catch (e) {} }
+      if (ev.tipo === 'registrar') {
+        corpo.notas = (corpo.notas || []).map(n => ({ numero: String(n.numero ?? '').replace(/\D/g, '') || 'S/N', volume: String(n.volume ?? '').replace(/\D/g, ''), chave: n.chave || null }));
+        corpo.notas_json = JSON.stringify(corpo.notas);
+      }
+      try {
+        const r = await http('POST', CONFIG.ROTA_SYNC_ANTIGA, corpo, CONFIG.TIMEOUT_ENVIO_MS);
+        if (!(r.status >= 200 && r.status < 300)) throw new Error('servidor');
+      } catch (e) {
+        box.textContent = `Há ${pend.length} registro(s) da versão anterior ainda no celular. Conecte-se à internet — o envio tenta de novo sozinho.`;
+        return false;
+      }
+      FILA = FILA.filter(x => x.uuid !== ev.uuid);
+      if (ev.foto) await Store.apagarFoto(ev.foto);
+      await Store.set('fila', FILA);
+      pend = FILA.filter(e => e.estado === 'pendente' && e.tipo !== 'posicao');
+    }
+    box.style.display = 'none';
+    return true;
+  }
+
+  async function migrarVersaoAntiga(antiga) {
+    document.getElementById('loginScreen').style.display = 'flex';
+    const ok = await esvaziarFilaAntiga(antiga);
+    if (!ok) { setTimeout(() => migrarVersaoAntiga(antiga), 30000); return; }
+    FILA = []; BASE = { dia: null, coletas: [], turno: { saida_base: null, retorno_base: null }, atualizado_em: null };
+    await Store.set('fila', FILA); await Store.set('base', BASE); await Store.del('sessao'); await Store.del('registros');
+    await Store.apagarTodasFotos();
+    SESSAO = { motoristaId: null, nome: null, token: null };
+    const err = document.getElementById('loginError');
+    err.textContent = 'App atualizado. Entre com o seu usuário e senha do Portal dos usuários.';
+    err.classList.add('show');
+  }
+
   async function entrarNoApp() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('appRoot').style.display = 'block';
     document.getElementById('driverChip').textContent = SESSAO.nome || '';
+    document.getElementById('versaoApp').textContent = 'App do motorista ' + VERSAO_APP;
     recomputar();               // mostra na hora o que já está salvo
     iniciarCiclos();
     ciclo(false);               // e depois tenta enviar/atualizar
@@ -1686,6 +1974,7 @@
       : 'Sair do aplicativo?';
     if (!(await confirmarAcao(msg, 'Sair'))) return;
 
+    try { await api('sair', {}, 8000); } catch (e) { /* sem sinal: o token expira sozinho */ }
     pararCiclos();
     await pararRastreio();
     SESSAO = { motoristaId: null, nome: null, token: null };
@@ -1721,11 +2010,17 @@
     BASE = (await Store.get('base')) || BASE;
     FILA = (await Store.get('fila')) || [];
     REGISTROS = (await Store.get('registros')) || {};
+    const marca = await Store.get('marca');
+    if (marca) aplicarMarca(marca);
 
-    if (sessao && sessao.motoristaId) {
+    if (sessao && sessao.motoristaId && sessao.versao !== 3) {
+      // celular vindo da versão anterior (sistema antigo)
+      await migrarVersaoAntiga(sessao);
+    } else if (sessao && sessao.motoristaId && sessao.token) {
       SESSAO = sessao;
       await entrarNoApp();
     } else {
+      if (sessao && sessao.motoristaId) SESSAO = sessao;   // sessão terminou: fila guardada espera o novo login
       document.getElementById('loginScreen').style.display = 'flex';
     }
   })();

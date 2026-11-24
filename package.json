@@ -1,8 +1,8 @@
 {
   "name": "oeste-cargas-motorista",
-  "version": "2.3.1",
+  "version": "3.0.0",
   "private": true,
-  "description": "App do Motorista Oeste Cargas — offline-first (Capacitor)",
+  "description": "App do Motorista Oeste Cargas — offline-first (Capacitor), Controle de Coleta v2",
   "scripts": {
     "android:add": "cap add android",
     "android:sync": "cap sync android && node scripts/patch-android.js",
