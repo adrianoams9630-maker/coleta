@@ -3,6 +3,7 @@ name: APK Motorista (offline)
 on:
   push:
     branches: [main]
+    paths-ignore: ['adm-windows/**', '.github/workflows/adm-windows.yml']
   workflow_dispatch:
 
 permissions:

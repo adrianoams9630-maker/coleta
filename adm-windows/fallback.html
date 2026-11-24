@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Oeste Cargas - Controle de Coleta</title>
+  <style>
+    html, body { height: 100%; margin: 0; }
+    body {
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(160deg, #b30101, #7a0000);
+      font-family: -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+      color: #fff; text-align: center;
+    }
+    .caixa { max-width: 420px; padding: 24px; }
+    .caixa h1 { font-size: 20px; margin: 0 0 10px 0; }
+    .caixa p { font-size: 13.5px; opacity: 0.85; line-height: 1.6; margin: 0 0 20px 0; }
+    #detalhe { font-size: 11.5px; opacity: 0.6; margin-top: 16px; }
+    button {
+      background: #fff; color: #8f0000; border: none; padding: 11px 24px;
+      border-radius: 9px; font-weight: 700; font-size: 13.5px; cursor: pointer;
+    }
+    button:hover { filter: brightness(0.95); }
+  </style>
+</head>
+<body>
+  <div class="caixa">
+    <h1>Não foi possível conectar</h1>
+    <p>
+      Verifique sua conexão com a internet e se o endereço do servidor
+      está configurado corretamente.
+    </p>
+    <button onclick="tentarDeNovo()">Tentar de novo</button>
+    <div id="detalhe"></div>
+  </div>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const erro = params.get('erro');
+    const alvo = params.get('alvo');
+    if (erro) document.getElementById('detalhe').textContent = 'Detalhe técnico: ' + erro;
+
+    function tentarDeNovo() {
+      // Precisa navegar para a URL REAL do painel, não recarregar esta
+      // própria tela de erro (que sempre "funcionaria", já que é um
+      // arquivo local — location.reload() nunca detectaria que o
+      // servidor voltou a responder).
+      location.href = alvo || 'about:blank';
+    }
+  </script>
+</body>
+</html>

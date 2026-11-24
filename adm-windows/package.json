@@ -1,0 +1,36 @@
+{
+  "name": "oeste-cargas-adm-coleta",
+  "version": "1.0.0",
+  "description": "Controle de Coleta v2 (painel ADM) - Oeste Cargas Transportadora (app Windows)",
+  "author": "Paidegua Sistema",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win --publish never"
+  },
+  "build": {
+    "appId": "br.com.oestecargas.admcoleta",
+    "productName": "Oeste Cargas - Controle de Coleta",
+    "publish": null,
+    "files": ["main.js", "preload.js", "config.json", "fallback.html", "build/**"],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico",
+      "executableName": "OesteCargas-ControleColeta"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Oeste Cargas - Controle de Coleta",
+      "guid": "5d0c7b2e-8f4a-4c61-9a37-2e6b1f0c9d14",
+      "artifactName": "OesteCargas-ControleColeta-Setup.${ext}"
+    }
+  },
+  "devDependencies": {
+    "electron": "^44.3.0",
+    "electron-builder": "^26.15.3"
+  }
+}

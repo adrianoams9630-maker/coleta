@@ -1,0 +1,60 @@
+name: App Windows · Controle de Coleta (ADM)
+
+on:
+  push:
+    branches: [main]
+    paths: ['adm-windows/**', '.github/workflows/adm-windows.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write   # publicar o instalador em Releases
+
+jobs:
+  build:
+    # máquina Windows do GitHub: gera o instalador .exe de verdade
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: adm-windows
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Instalar dependências
+        run: npm install
+
+      - name: Versão (1.0.<build>)
+        shell: bash
+        run: npm version "1.0.${{ github.run_number }}" --no-git-tag-version --allow-same-version
+
+      - name: Gerar o instalador (.exe)
+        run: npm run build:win
+
+      - name: Guardar o instalador
+        uses: actions/upload-artifact@v4
+        with:
+          name: oeste-cargas-controle-coleta-windows
+          path: adm-windows/dist/*.exe
+          retention-days: 90
+
+      # Link fixo: .../releases/download/adm-windows/OesteCargas-ControleColeta-Setup.exe
+      # (não marca como "latest": o link fixo do APK do motorista continua apontando para o APK)
+      - name: Publicar em Releases
+        if: github.ref == 'refs/heads/main'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSAO=$(node -p "require('./package.json').version")
+          if gh release view adm-windows >/dev/null 2>&1; then
+            gh release upload adm-windows dist/OesteCargas-ControleColeta-Setup.exe --clobber
+            gh release edit adm-windows --title "Controle de Coleta (ADM) · Windows ${VERSAO}" --latest=false
+          else
+            gh release create adm-windows dist/OesteCargas-ControleColeta-Setup.exe \
+              --title "Controle de Coleta (ADM) · Windows ${VERSAO}" \
+              --notes "Instalador do app Windows do painel ADM do Controle de Coleta v2." \
+              --latest=false
+          fi
