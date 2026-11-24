@@ -79,6 +79,7 @@
   .badge.aguardando{background:#f1ecec; color:var(--muted);}
   .badge.cancelada{background:#fff0f0; color:var(--red);}
   .badge.dedicada{background:#fff4e5; color:#a35b00; margin-left:4px;}
+  .cod{display:inline-block; font-size:11px; font-weight:800; color:var(--muted); background:#f1ecec; border-radius:6px; padding:2px 6px; margin-right:6px; vertical-align:2px;}
   .info-row{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
   .info{font-size:11.5px; font-weight:600; background:#f6f2f2; color:var(--text); border-radius:8px; padding:4px 8px;}
   .info.alerta{background:#fff4e5; color:#8a4b00;}
@@ -1482,7 +1483,7 @@
         <div class="card${fechada ? ' fechada' : ''}${NOVAS.has(c.id) ? ' nova' : ''}">
           <div class="card-head">
             <div>
-              <div class="name">${esc(c.cliente)}${c.classificacao === 'dedicada' ? '<span class="badge dedicada">Dedicada</span>' : ''}</div>
+              <div class="name">${c.codigo ? `<span class="cod">${esc(c.codigo)}</span>` : ''}${esc(c.cliente)}${c.classificacao === 'dedicada' ? '<span class="badge dedicada">Dedicada</span>' : ''}</div>
               <div class="addr">${esc(c.endereco || 'Endereço não cadastrado')}</div>
             </div>
             ${badge}
