@@ -54,6 +54,17 @@
   .btn-turno.encerrar{background:var(--red);}
   .btn-turno:disabled{background:#d8d3d3; color:var(--muted);}
   .turno-hint{font-size:11px; color:var(--muted); margin-top:8px; text-align:center;}
+  .turno-km{display:flex; gap:8px; margin:-2px 0 10px 0; flex-wrap:wrap; align-items:center;}
+  .turno-km span{background:#f4f6fa; border:1px solid var(--line); border-radius:8px; padding:5px 9px; font-size:12px; color:var(--muted);}
+  .turno-km b{color:var(--text);}
+  .turno-km button{background:none; border:none; color:var(--navy); font-size:12px; font-weight:700; padding:5px 4px; text-decoration:underline;}
+  .km-input{width:100%; border:1.5px solid var(--line); border-radius:12px; padding:14px; font-size:26px; font-weight:800;
+    letter-spacing:1px; text-align:center; font-variant-numeric:tabular-nums; background:#fbfcfe;}
+  .km-input:focus{outline:none; border-color:var(--navy); background:#fff;}
+  .km-placa{width:100%; border:1px solid var(--line); border-radius:10px; padding:11px; font-size:15px; font-weight:700; text-transform:uppercase; text-align:center;}
+  .km-info{font-size:12px; color:var(--muted); margin-top:8px; text-align:center; line-height:1.45; min-height:16px;}
+  .km-info.erro{color:var(--red); font-weight:700;}
+  .km-info.ok{color:var(--ok); font-weight:700;}
   .stat{
     flex:1; background:var(--card); border-radius:var(--radius); padding:12px;
     box-shadow: 0 6px 18px rgba(22,34,63,0.08); text-align:center;
@@ -440,6 +451,24 @@
   </div>
 </div>
 
+<!-- Bottom sheet de KM (hodômetro) — saída e retorno da rota -->
+<div class="overlay" id="overlayKm">
+  <div class="sheet">
+    <button class="close-x" onclick="fecharModalKm()">✕</button>
+    <div class="sheet-handle"></div>
+    <h2 id="kmTitulo">KM de saída</h2>
+    <div class="sub" id="kmSub">Informe o KM do painel (hodômetro) do veículo.</div>
+    <div id="kmPlacaBox">
+      <div class="field-label">Placa do veículo</div>
+      <input id="kmPlaca" class="km-placa" maxlength="8" autocomplete="off" autocapitalize="characters" placeholder="ABC1D23">
+    </div>
+    <div class="field-label">KM do hodômetro</div>
+    <input id="kmValor" class="km-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="9" autocomplete="off" placeholder="0">
+    <div class="km-info" id="kmInfo"></div>
+    <button class="btn btn-primary sheet-submit" id="btnKm" onclick="confirmarKm()">Confirmar</button>
+  </div>
+</div>
+
 <!-- Diálogo e aviso rápido (substituem alert/confirm) -->
 <div class="dlg-overlay" id="dlgOverlay">
   <div class="dlg">
@@ -475,7 +504,7 @@
   //    Preferences  → sessão, lista do dia, fila de eventos
   //    Filesystem   → fotos (JPEG comprimido), uma por evento
   // ============================================================
-  const VERSAO_APP = '3.0';
+  const VERSAO_APP = '3.1';
   const CONFIG = {
     API: 'https://n8n.paideguasistema.com.br/webhook',
     ROTA_APP: '/oeste-coletas2-motorista',      // Controle de Coleta v2
@@ -690,6 +719,8 @@
   // ------------------------------------------------------------
   let SESSAO = { motoristaId: null, nome: null, token: null };
   let BASE = { dia: null, coletas: [], turno: { saida_base: null, retorno_base: null }, atualizado_em: null };
+  // regras do hodômetro (vem do servidor na lista do dia)
+  let KMCFG = { obrigatorio: true, max_dia: 1500, ultimo: null };
   let FILA = [];
   let coletas = [];
   let TURNO = { saida_base: null, retorno_base: null };
@@ -710,9 +741,16 @@
     if (ev.tipo === 'posicao') return;
     if (ev.tipo === 'turno_iniciar' && !alvoTurno.saida_base) {
       alvoTurno.saida_base = ev.resultado?.saida_base || ev.capturado_em;
+      if (alvoTurno.km_saida == null && ev.payload?.km_saida != null) alvoTurno.km_saida = ev.payload.km_saida;
+      if (!alvoTurno.placa && ev.payload?.placa) alvoTurno.placa = ev.payload.placa;
     }
     if (ev.tipo === 'turno_encerrar' && !alvoTurno.retorno_base) {
       alvoTurno.retorno_base = ev.resultado?.retorno_base || ev.capturado_em;
+      if (alvoTurno.km_retorno == null && ev.payload?.km_retorno != null) alvoTurno.km_retorno = ev.payload.km_retorno;
+    }
+    if (ev.tipo === 'turno_km') {
+      if (ev.payload?.km_saida != null) alvoTurno.km_saida = ev.payload.km_saida;
+      if (ev.payload?.km_retorno != null) alvoTurno.km_retorno = ev.payload.km_retorno;
     }
     const c = alvoColetas.find(x => x.id === ev.coleta_id);
     if (!c) return;
@@ -972,6 +1010,7 @@
         atualizado_em: new Date().toISOString()
       };
       if (data.marca) aplicarMarca(data.marca);
+      if (data.km) { KMCFG = { ...KMCFG, ...data.km }; await Store.set('km_cfg', KMCFG); }
       await salvarBase();
       avisarMudancas(antes, BASE.coletas);
       recomputar();
@@ -1089,7 +1128,7 @@
   }
 
   function algumModalAberto() {
-    return ['overlay', 'overlayChegada', 'overlayNao', 'dlgOverlay']
+    return ['overlay', 'overlayChegada', 'overlayNao', 'overlayKm', 'dlgOverlay']
       .some(id => document.getElementById(id).classList.contains('open'));
   }
 
@@ -1112,6 +1151,7 @@
         if (document.getElementById('overlay').classList.contains('open')) return fecharModal();
         if (document.getElementById('overlayChegada').classList.contains('open')) return fecharModalChegada();
         if (document.getElementById('overlayNao').classList.contains('open')) return fecharModalNao();
+        if (document.getElementById('overlayKm').classList.contains('open')) return fecharModalKm();
         PL.App.minimizeApp();
       });
     }
@@ -1178,6 +1218,20 @@
   // ============================================================
   //  TURNO — saída e retorno do veículo na transportadora.
   // ============================================================
+  function kmRodado() {
+    return TURNO.km_saida != null && TURNO.km_retorno != null && TURNO.km_retorno >= TURNO.km_saida
+      ? TURNO.km_retorno - TURNO.km_saida : null;
+  }
+  function blocoKm(encerrada) {
+    const p = [];
+    if (TURNO.placa) p.push(`<span>Veículo <b>${esc(TURNO.placa)}</b></span>`);
+    p.push(`<span>KM saída <b>${TURNO.km_saida != null ? fmtKm(TURNO.km_saida) : '—'}</b></span>`);
+    if (encerrada) p.push(`<span>KM retorno <b>${TURNO.km_retorno != null ? fmtKm(TURNO.km_retorno) : '—'}</b></span>`);
+    p.push(`<button onclick="corrigirKm('saida')">${TURNO.km_saida != null ? 'corrigir saída' : 'informar KM saída'}</button>`);
+    if (encerrada) p.push(`<button onclick="corrigirKm('retorno')">${TURNO.km_retorno != null ? 'corrigir retorno' : 'informar KM retorno'}</button>`);
+    return `<div class="turno-km">${p.join('')}</div>`;
+  }
+
   function renderTurno() {
     atualizarRastreio();
     const box = document.getElementById('turnoBox');
@@ -1192,11 +1246,13 @@
           <span class="dot parado"></span>
           Rota encerrada às ${formatarHorario(TURNO.retorno_base)} · Duração total: ${formatarDuracao(duracaoMin)}
         </div>
+        ${blocoKm(true)}
         <div class="resumo-dia">
           <div><b>${feitas.length}</b>coletas</div>
           <div><b>${feitas.reduce((t, c) => t + (Number(c.quantidade_notas) || 0), 0)}</b>notas</div>
           <div><b>${feitas.reduce((t, c) => t + (Number(c.quantidade_volumes) || 0), 0)}</b>volumes</div>
           <div><b>${coletas.filter(c => c.status === 'recusada').length}</b>não colet.</div>
+          ${kmRodado() != null ? `<div><b>${fmtKm(kmRodado())}</b>km rodados</div>` : ''}
         </div>`;
       return;
     }
@@ -1207,6 +1263,7 @@
       box.className = 'turno-box';
       box.innerHTML = `
         <div class="turno-status"><span class="dot"></span>Rota iniciada às ${formatarHorario(TURNO.saida_base)}</div>
+        ${blocoKm(false)}
         <button class="btn-turno encerrar" id="btnEncerrarRota" onclick="encerrarRota()" ${podeEncerrar ? '' : 'disabled'}>
           🏁 Encerrar rota
         </button>
@@ -1361,22 +1418,123 @@
     });
   }
 
+  // ------------------------------------------------------------
+  //  HODÔMETRO — KM de saída (ao iniciar) e de retorno (ao encerrar).
+  //  pedirKm(tipo, corrigir) abre a folha e devolve {km, placa} ou null.
+  // ------------------------------------------------------------
+  const fmtKm = n => Number(n).toLocaleString('pt-BR');
+  const soDigitos = v => String(v ?? '').replace(/\D/g, '');
+  let KM_PEDIDO = null;
+
+  function placaDoDia() {
+    return TURNO.placa || (coletas.find(c => c.placa) || {}).placa || '';
+  }
+
+  function pedirKm(tipo, corrigir = false) {
+    if (KM_PEDIDO) fecharModalKm();
+    return new Promise(resolve => {
+      KM_PEDIDO = { tipo, corrigir, resolve };
+      const saida = tipo === 'saida';
+      document.getElementById('kmTitulo').textContent = (corrigir ? 'Corrigir ' : '') + (saida ? 'KM de saída' : 'KM de retorno');
+      document.getElementById('kmSub').textContent = saida
+        ? 'Antes de sair da transportadora, informe o KM do painel (hodômetro) do veículo.'
+        : 'Chegou na transportadora? Informe o KM do painel (hodômetro) do veículo.';
+      document.getElementById('kmPlacaBox').style.display = saida && !corrigir ? 'block' : 'none';
+      document.getElementById('kmPlaca').value = placaDoDia();
+      const atual = saida ? TURNO.km_saida : TURNO.km_retorno;
+      // saída: sugere o último KM conhecido (retorno do último dia); retorno: começa vazio
+      const sugerido = atual != null ? atual : (saida && KMCFG.ultimo != null ? KMCFG.ultimo : null);
+      const inp = document.getElementById('kmValor');
+      inp.value = sugerido != null ? String(sugerido) : '';
+      inp.oninput = () => { inp.value = soDigitos(inp.value).slice(0, 7); infoKm(); };
+      document.getElementById('btnKm').textContent = corrigir ? 'Salvar KM' : (saida ? '🚚 Iniciar rota' : '🏁 Encerrar rota');
+      infoKm();
+      document.getElementById('overlayKm').classList.add('open');
+      setTimeout(() => { try { inp.focus(); inp.select(); } catch (e) {} }, 250);
+    });
+  }
+
+  // texto de apoio embaixo do campo (KM rodados / avisos)
+  function infoKm() {
+    const box = document.getElementById('kmInfo');
+    const v = soDigitos(document.getElementById('kmValor').value);
+    box.className = 'km-info';
+    box.textContent = '';
+    if (!KM_PEDIDO) return;
+    if (KM_PEDIDO.tipo === 'saida') {
+      if (KMCFG.ultimo != null) box.textContent = 'Último KM informado: ' + fmtKm(KMCFG.ultimo);
+      if (v && KMCFG.ultimo != null && Number(v) < KMCFG.ultimo) { box.textContent = 'Atenção: menor que o último KM informado (' + fmtKm(KMCFG.ultimo) + ').'; box.className = 'km-info erro'; }
+      return;
+    }
+    if (TURNO.km_saida == null) { box.textContent = 'KM de saída não informado.'; return; }
+    if (!v) { box.textContent = 'KM de saída: ' + fmtKm(TURNO.km_saida); return; }
+    const rod = Number(v) - TURNO.km_saida;
+    if (rod < 0) { box.textContent = 'Menor que o KM de saída (' + fmtKm(TURNO.km_saida) + '). Confira o número.'; box.className = 'km-info erro'; }
+    else { box.textContent = 'KM de saída ' + fmtKm(TURNO.km_saida) + ' → rodou ' + fmtKm(rod) + ' km hoje.'; box.className = 'km-info ok'; }
+  }
+
+  function fecharModalKm(valor = null) {
+    document.getElementById('overlayKm').classList.remove('open');
+    if (KM_PEDIDO) { const r = KM_PEDIDO.resolve; KM_PEDIDO = null; r(valor); }
+  }
+
+  async function confirmarKm() {
+    if (!KM_PEDIDO) return;
+    const { tipo, corrigir } = KM_PEDIDO;
+    const txt = soDigitos(document.getElementById('kmValor').value);
+    const placa = String(document.getElementById('kmPlaca').value || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
+    if (!txt) {
+      if (KMCFG.obrigatorio || corrigir) { await avisar('Informe o KM do hodômetro.'); return; }
+      return fecharModalKm({ km: null, placa: placa || null });
+    }
+    const km = Number(txt);
+    if (tipo === 'retorno' && TURNO.km_saida != null) {
+      const rod = km - TURNO.km_saida;
+      if (rod < 0) { await avisar(`O KM de retorno (${fmtKm(km)}) é menor que o de saída (${fmtKm(TURNO.km_saida)}).\n\nConfira o painel. Se o KM de saída estiver errado, corrija-o na tela da rota.`); return; }
+      if (rod > (Number(KMCFG.max_dia) || 1500) &&
+          !(await confirmarAcao(`Rodou ${fmtKm(rod)} km hoje? É bem acima do normal.\n\nConfira o número antes de confirmar.`, 'Está certo'))) return;
+    }
+    if (tipo === 'saida' && KMCFG.ultimo != null && !corrigir) {
+      if (km < KMCFG.ultimo && !(await confirmarAcao(`KM ${fmtKm(km)} é menor que o último informado (${fmtKm(KMCFG.ultimo)}).\n\nTrocou de veículo? Se sim, confirme.`, 'Confirmar'))) return;
+      if (km - KMCFG.ultimo > 5000 && !(await confirmarAcao(`KM ${fmtKm(km)} está ${fmtKm(km - KMCFG.ultimo)} km acima do último informado. Confirmar?`, 'Confirmar'))) return;
+    }
+    if (tipo === 'saida' && corrigir && TURNO.km_retorno != null && km > TURNO.km_retorno) {
+      await avisar(`O KM de saída não pode ser maior que o de retorno (${fmtKm(TURNO.km_retorno)}).`); return;
+    }
+    if (tipo === 'retorno' && !corrigir &&
+        !(await confirmarAcao(`Confirmar retorno à transportadora com KM ${fmtKm(km)}?`, 'Encerrar rota'))) return;
+    fecharModalKm({ km, placa: placa || null });
+  }
+
+  // correção do KM depois de informado (enquanto o dia está aberto no app)
+  async function corrigirKm(tipo) {
+    const r = await pedirKm(tipo, true);
+    if (!r || r.km == null) return;
+    const payload = tipo === 'saida' ? { km_saida: r.km } : { km_retorno: r.km };
+    await enfileirar({ tipo: 'turno_km', coleta_id: null, payload, rotulo: 'Correção do KM de ' + (tipo === 'saida' ? 'saída' : 'retorno') + ' · ' + fmtKm(r.km) });
+    toast('KM corrigido.', 'ok');
+  }
+
   async function iniciarRota() {
     if (TURNO.saida_base) return;
-    // zera o intervalo: o primeiro ponto vai junto com a saída da base
+    const r = await pedirKm('saida');
+    if (!r || TURNO.saida_base) return;
     RASTREIO.ultimoEnvio = 0; await Store.set('posicao_ultimo_envio', 0);
-    await enfileirar({ tipo: 'turno_iniciar', coleta_id: null, payload: {}, rotulo: 'Início da rota' });
+    await enfileirar({ tipo: 'turno_iniciar', coleta_id: null, payload: { km_saida: r.km, placa: r.placa },
+                       rotulo: 'Início da rota' + (r.km != null ? ' · KM ' + fmtKm(r.km) : '') });
     toast('Rota iniciada.', 'ok');
   }
 
   async function encerrarRota() {
     const pendentes = coletas.filter(c => c.status === 'confirmada' || c.status === 'em_andamento').length;
     if (pendentes > 0) { await avisar(`Ainda há ${pendentes} coleta(s) pendente(s). Finalize ou marque como não coletada antes de encerrar a rota.`); return; }
-    if (!(await confirmarAcao('Confirmar retorno à transportadora?', 'Encerrar rota'))) return;
+    const r = await pedirKm('retorno');
+    if (!r || TURNO.retorno_base) return;
     if (RASTREIO.ultimaFix && rastreioDeveriaEstarAtivo()) {
       await registrarPosicao(RASTREIO.ultimaFix, new Date().toISOString());
     }
-    await enfileirar({ tipo: 'turno_encerrar', coleta_id: null, payload: {}, rotulo: 'Encerramento da rota' });
+    await enfileirar({ tipo: 'turno_encerrar', coleta_id: null, payload: { km_retorno: r.km },
+                       rotulo: 'Encerramento da rota' + (r.km != null ? ' · KM ' + fmtKm(r.km) : '') });
     toast('Rota encerrada.', 'ok');
   }
 
@@ -2014,6 +2172,7 @@
     const sessao = await Store.get('sessao');
     BASE = (await Store.get('base')) || BASE;
     FILA = (await Store.get('fila')) || [];
+    KMCFG = { ...KMCFG, ...((await Store.get('km_cfg')) || {}) };
     REGISTROS = (await Store.get('registros')) || {};
     const marca = await Store.get('marca');
     if (marca) aplicarMarca(marca);

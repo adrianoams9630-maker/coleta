@@ -40,7 +40,7 @@ jobs:
       - name: Sincronizar www + plugins e ajustar manifest
         env:
           APP_VERSION_CODE: ${{ github.run_number }}0
-          APP_VERSION_NAME: 3.0.${{ github.run_number }}
+          APP_VERSION_NAME: 3.1.${{ github.run_number }}
         run: |
           npx cap sync android
           node scripts/patch-android.js
