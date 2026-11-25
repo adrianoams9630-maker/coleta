@@ -1005,7 +1005,10 @@
     const confirmadas = depois.filter(c => c.status === 'confirmada' && ant.has(c.id) && ant.get(c.id).status === 'aguardando_resposta');
     novas.forEach(c => NOVAS.add(c.id));
     const msgs = [];
-    if (novas.length) msgs.push(novas.length === 1 ? 'Nova coleta: ' + novas[0].cliente : novas.length + ' coletas novas na sua rota');
+    // a coleta chega ao app quando o cliente confirma (ou o escritório libera)
+    const pelaConf = novas.filter(c => c.confirmada_pelo_cliente), outras = novas.filter(c => !c.confirmada_pelo_cliente);
+    if (pelaConf.length) msgs.push(pelaConf.length === 1 ? 'Cliente confirmou: ' + pelaConf[0].cliente + ' — coleta liberada' : pelaConf.length + ' clientes confirmaram — coletas liberadas');
+    if (outras.length) msgs.push(outras.length === 1 ? 'Nova coleta: ' + outras[0].cliente : outras.length + ' coletas novas na sua rota');
     if (confirmadas.length) msgs.push(confirmadas.length === 1 ? 'Cliente confirmou: ' + confirmadas[0].cliente : confirmadas.length + ' clientes confirmaram');
     if (canceladas.length) msgs.push(canceladas.length === 1 ? 'Coleta cancelada: ' + canceladas[0].cliente : canceladas.length + ' coletas canceladas');
     if (!msgs.length) return;
@@ -1418,7 +1421,8 @@
           <div class="vazio-ico">📋</div>
           <div class="vazio-titulo">Nenhuma coleta para hoje</div>
           <div class="vazio-texto">
-            Aparecem aqui as coletas da sua rota lançadas pelo escritório.
+            As coletas da sua rota aparecem aqui assim que o cliente confirma
+            (ou o escritório libera). O app avisa quando chegar uma nova.
             Se você esperava ver alguma, fale com o escritório.
           </div>
           <button class="btn-ghost-mob" onclick="atualizarManual()">Atualizar</button>
